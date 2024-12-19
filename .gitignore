@@ -1,0 +1,28 @@
+# .gitignore for C and Python project
+
+# Ignore Python bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Ignore Python package manager files
+*.egg-info/
+dist/
+build/
+
+# Ignore C build files
+*.o
+*.a
+*.so
+*.out
+*.exe
+*.dll
+*.obj
+*.dSYM/
+
+# Ignore IDE or editor files
+.vscode/
+.idea/
+
+# Ignore system files
+.DS_Store
