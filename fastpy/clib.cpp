@@ -47,11 +47,11 @@ std::span<T> get_span_of_array(PyObject *array) {
 }
 
 template <ValidType T>
-std::span<T> get_array(PyObject *&array, size_t size) {
+std::span<T> get_array(PyObject **array, size_t size) {
 
     npy_intp npy_size = static_cast<npy_intp>(size);
-    array = PyArray_SimpleNew(1, &npy_size, get_numpy_type_for_c_type<T>());
-    PyArrayObject *py_array = (PyArrayObject *)array;
+    *array = PyArray_SimpleNew(1, &npy_size, get_numpy_type_for_c_type<T>());
+    PyArrayObject *py_array = (PyArrayObject *)(*array);
     T *data = (T *)PyArray_DATA(py_array);
 
     return std::span<T>(data, size);
@@ -59,7 +59,7 @@ std::span<T> get_array(PyObject *&array, size_t size) {
 
 // <<<<<<< Some usefull wrappers <<<<<<<
 
-int cumsum_impl_wrapper(PyObject *input_array, PyObject *&output_array) {
+int cumsum_impl_wrapper(PyObject *input_array, PyObject **output_array) {
     try {
 
         auto input_array_span = get_span_of_array<const double>(input_array);
@@ -91,7 +91,7 @@ static PyObject *cumsum(PyObject *self, PyObject *args) {
     }
 
     // Pass arguments to C++ where the answer will be written to an allocated output_array
-    if (cumsum_impl_wrapper(input_array, output_array)) {
+    if (cumsum_impl_wrapper(input_array, &output_array)) {
         return NULL;
     }
 
