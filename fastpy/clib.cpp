@@ -65,7 +65,7 @@ int cumsum_impl_wrapper(PyObject *input_array, PyObject *&output_array) {
         auto input_array_span = get_span_of_array<const double>(input_array);
         auto output_array_span = get_array<double>(output_array, input_array_span.size());
 
-        int running_sum = 0;
+        double running_sum = 0;
         for (size_t i = 0; i < output_array_span.size(); ++i) {
             running_sum += input_array_span[i];
             output_array_span[i] = running_sum;
