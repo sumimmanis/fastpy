@@ -7,8 +7,8 @@
 
 template <typename T>
 void cumsum_impl(PyObject *input_array, PyObject **output_array) {
-    auto input_array_span = get_span_of_array<const T>(input_array);
-    auto output_array_span = get_array<T>(output_array, input_array_span.size());
+    auto input_array_span = get_span_of_array<const T>(input_array); // Get input array as a span
+    auto output_array_span = get_array<T>(output_array, input_array_span.size()); // Create output array and get it as a span
 
     T running_sum = 0;
     for (size_t i = 0; i < output_array_span.size(); ++i) {
@@ -17,27 +17,27 @@ void cumsum_impl(PyObject *input_array, PyObject **output_array) {
     }
 }
 
-void cumsum_impl_wrapper(PyObject *input_array, PyObject **output_array) {
-    try {
-
-        int dtype = get_array_dtype(input_array);
-        CALL_TEMPLATED_FUNC(cumsum_impl, dtype, input_array, output_array);
-
-    } catch (const std::exception &e) {
-        set_exception_free_memory(output_array, e);
-    }
-}
-
 extern "C" {
 static PyObject *cumsum(PyObject *self, PyObject *args) {
-    PyObject *input_array, *output_array = NULL;
+    PyObject *input_array;
+    PyObject *output_array = NULL;
 
+    // Reads the input arguments: "O" means a single Python object is expected
     if (!PyArg_ParseTuple(args, "O", &input_array)) {
         return NULL;
     }
 
-    // On failure sets python's API exception variable and sets output_array = NONE
-    cumsum_impl_wrapper(input_array, &output_array);
+    try {
+        // Determine the data type of the input array: all integer sizes and float32/float64 are supported
+        int dtype = get_array_dtype(input_array);
+
+        // Call the templated implementation based on the input array's data type
+        CALL_TEMPLATED_FUNC(cumsum_impl, dtype, input_array, &output_array);
+
+    } catch (const std::exception &e) {
+        // On failure sets python's API exception variable and sets output_array = NONE
+        set_exception_free_memory(&output_array, e);
+    }
     return output_array;
 }
 
